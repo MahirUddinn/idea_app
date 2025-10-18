@@ -6,6 +6,7 @@ import 'package:akjfkgnjkawgnf/cubit/notes_state.dart';
 import 'package:akjfkgnjkawgnf/model/note.dart';
 
 class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
   final TextEditingController _textController = TextEditingController();
 
   @override

@@ -4,13 +4,13 @@ import 'dart:async';
 
 import 'package:akjfkgnjkawgnf/model/note.dart';
 
-class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  factory DatabaseHelper() => _instance;
+class AppDataBase {
+  static final AppDataBase _instance = AppDataBase._internal();
+  factory AppDataBase() => _instance;
 
   static Database? _database;
 
-  DatabaseHelper._internal();
+  AppDataBase._internal();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -20,11 +20,7 @@ class DatabaseHelper {
 
   Future<Database> _initDB() async {
     String path = join(await getDatabasesPath(), 'notes.db');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
   Future _onCreate(Database db, int version) async {
@@ -45,21 +41,11 @@ class DatabaseHelper {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('notes');
 
-    return List.generate(maps.length, (i) {
-      return Note(
-        id: maps[i]['id'],
-        content: maps[i]['content'],
-      );
-    });
+    return maps.map((map) => Note.fromMap(map)).toList();
   }
 
   Future<int> deleteNote(int id) async {
     Database db = await database;
-    return await db.delete(
-      'notes',
-      where: 'id = ?',
-      whereArgs: [id],
-
-    );
+    return await db.delete('notes', where: 'id = ?', whereArgs: [id]);
   }
 }

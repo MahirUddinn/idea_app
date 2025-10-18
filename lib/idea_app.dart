@@ -1,5 +1,8 @@
 import 'package:akjfkgnjkawgnf/screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:akjfkgnjkawgnf/cubit/notes_cubit.dart';
+import 'package:akjfkgnjkawgnf/data/appDataBase.dart';
 
 class IdeaApp extends StatelessWidget {
   const IdeaApp({super.key});
@@ -7,7 +10,14 @@ class IdeaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        themeMode: ThemeMode.dark,
-        home: HomeScreen());
+      title: 'Notes App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: BlocProvider(
+        create: (context) => NotesCubit(AppDataBase()),
+        child: HomeScreen(),
+      ),
+    );
   }
 }

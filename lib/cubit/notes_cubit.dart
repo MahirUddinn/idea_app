@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:akjfkgnjkawgnf/model/note.dart';
-import 'package:akjfkgnjkawgnf/data/database_helper.dart';
+import 'package:akjfkgnjkawgnf/data/appDataBase.dart';
 import 'package:akjfkgnjkawgnf/cubit/notes_state.dart';
 
 class NotesCubit extends Cubit<NotesState> {
-  final DatabaseHelper _databaseHelper;
+  final AppDataBase _databaseHelper;
 
   NotesCubit(this._databaseHelper) : super(const NotesState());
 
