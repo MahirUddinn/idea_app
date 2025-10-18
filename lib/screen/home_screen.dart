@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           if (state.status == NotesStatus.loaded) {
             if (state.notes.isEmpty) {
-              return Center(child: Text('No notes yet.'));
+              return Center(child: Text('no notes detected'));
             }
             return ListView.builder(
               itemCount: state.notes.length,
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
           if (state.status == NotesStatus.error) {
-            return Center(child: Text(state.errorMessage ?? 'An error occurred'));
+            return Center(child: Text(state.errorMessage ?? 'error message'));
           }
           return Container();
         },

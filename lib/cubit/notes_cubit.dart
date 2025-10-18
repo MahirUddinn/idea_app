@@ -14,7 +14,7 @@ class NotesCubit extends Cubit<NotesState> {
       final notes = await databaseHelper.getNotes();
       emit(state.copyWith(status: NotesStatus.loaded, notes: notes));
     } catch (e) {
-      emit(state.copyWith(status: NotesStatus.error, errorMessage: "Failed to load notes: $e"));
+      emit(state.copyWith(status: NotesStatus.error, errorMessage: "Failed to load note: $e"));
     }
   }
 
