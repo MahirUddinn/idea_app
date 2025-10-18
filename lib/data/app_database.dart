@@ -4,16 +4,13 @@ import 'dart:async';
 
 import 'package:akjfkgnjkawgnf/model/note.dart';
 
-class AppDataBase {
-  static final AppDataBase _instance = AppDataBase._internal();
-  factory AppDataBase() => _instance;
-
-  static Database? _database;
-
-  AppDataBase._internal();
+class AppDatabase {
+  Database? _database;
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
+    if (_database != null) {
+      return _database!;
+    }
     _database = await _initDB();
     return _database!;
   }

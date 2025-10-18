@@ -5,9 +5,96 @@ import 'package:akjfkgnjkawgnf/cubit/notes_cubit.dart';
 import 'package:akjfkgnjkawgnf/cubit/notes_state.dart';
 import 'package:akjfkgnjkawgnf/model/note.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _textController = TextEditingController();
+
+  Widget _getUserInput(){
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _textController,
+            decoration: InputDecoration(
+              hintText: 'Enter a note',
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.save),
+          onPressed: () {
+            final content = _textController.text;
+            if (content.isNotEmpty) {
+              final note = Note(content: content);
+              context.read<NotesCubit>().addNote(note);
+              _textController.clear();
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _getBody(){
+    return Expanded(
+      child: BlocBuilder<NotesCubit, NotesState>(
+        builder: (context, state) {
+          if (state.status == NotesStatus.loading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (state.status == NotesStatus.loaded) {
+            if (state.notes.isEmpty) {
+              return Center(child: Text('No notes yet.'));
+            }
+            return ListView.builder(
+              itemCount: state.notes.length,
+              itemBuilder: (context, index) {
+                final note = state.notes[index];
+                return Dismissible(
+                  key: ValueKey(note.id),
+                  onDismissed: (direction) {
+                    context.read<NotesCubit>().deleteNote(note.id!);
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 20.0),
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+                  child: ListTile(
+                    title: Text(note.content),
+                    trailing: IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        SharePlus.instance.share(ShareParams(text: note.content));
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+          if (state.status == NotesStatus.error) {
+            return Center(child: Text(state.errorMessage ?? 'An error occurred'));
+          }
+          return Container();
+        },
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<NotesCubit>().loadNotes();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,60 +106,9 @@ class HomeScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter a note',
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.save),
-                  onPressed: () {
-                    final content = _textController.text;
-                    if (content.isNotEmpty) {
-                      final note = Note(content: content);
-                      context.read<NotesCubit>().addNote(note);
-                      _textController.clear();
-                    }
-                  },
-                ),
-              ],
-            ),
+            child: _getUserInput(),
           ),
-          Expanded(
-            child: BlocBuilder<NotesCubit, NotesState>(
-              builder: (context, state) {
-                if (state.status == NotesStatus.loading) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (state.status == NotesStatus.loaded) {
-                  return ListView.builder(
-                    itemCount: state.notes.length,
-                    itemBuilder: (context, index) {
-                      final note = state.notes[index];
-                      return ListTile(
-                        title: Text(note.content),
-                        trailing: IconButton(
-                          icon: Icon(Icons.share),
-                          onPressed: () {
-                            Share.share(note.content);
-                          },
-                        ),
-                      );
-                    },
-                  );
-                }
-                if (state.status == NotesStatus.error) {
-                  return Center(child: Text(state.errorMessage ?? 'An error occurred'));
-                }
-                return Container();
-              },
-            ),
-          ),
+          _getBody(),
         ],
       ),
     );

@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:akjfkgnjkawgnf/model/note.dart';
 
 enum NotesStatus { loading, loaded, error }
 
-class NotesState extends Equatable {
+class NotesState {
   final NotesStatus status;
   final List<Note> notes;
   final String? errorMessage;
@@ -25,7 +24,4 @@ class NotesState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
-
-  @override
-  List<Object?> get props => [status, notes, errorMessage];
 }
