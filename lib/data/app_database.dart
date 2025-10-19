@@ -45,4 +45,17 @@ class AppDatabase {
     Database db = await database;
     return await db.delete('notes', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<int> updateNote(Note note) async {
+    Database db = await database;
+    print("success");
+
+    return await db.update(
+      'notes',
+      note.toMap(),
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
+  }
+
 }

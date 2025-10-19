@@ -14,25 +14,58 @@ class NotesCubit extends Cubit<NotesState> {
       final notes = await databaseHelper.getNotes();
       emit(state.copyWith(status: NotesStatus.loaded, notes: notes));
     } catch (e) {
-      emit(state.copyWith(status: NotesStatus.error, errorMessage: "Failed to load note: $e"));
+      emit(
+        state.copyWith(
+          status: NotesStatus.error,
+          errorMessage: "Failed to load note: $e",
+        )
+      );
     }
   }
 
   void addNote(Note note) async {
     try {
       await databaseHelper.addNote(note);
-      loadNotes();
+      emit(state.copyWith(notes: [note,...state.notes]));
+
     } catch (e) {
-      emit(state.copyWith(status: NotesStatus.error, errorMessage: "Failed to add note: $e"));
+      emit(
+        state.copyWith(
+          status: NotesStatus.error,
+          errorMessage: "Failed to add note: $e",
+        ),
+      );
     }
   }
 
   void deleteNote(int id) async {
     try {
       await databaseHelper.deleteNote(id);
-      loadNotes();
     } catch (e) {
-      emit(state.copyWith(status: NotesStatus.error, errorMessage: "Failed to delete note: $e"));
+      emit(
+        state.copyWith(
+          status: NotesStatus.error,
+          errorMessage: "Failed to delete note: $e",
+        ),
+      );
+    }
+  }
+
+  void updateNote(Note note) async {
+    try {
+      await databaseHelper.updateNote(note);
+      final updatedNotes = state.notes.map((n) {
+        return n.id == note.id ? note : n;
+      }).toList();
+      emit(state.copyWith(notes: updatedNotes));
+
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: NotesStatus.error,
+          errorMessage: "Failed to update note: $e",
+        ),
+      );
     }
   }
 }

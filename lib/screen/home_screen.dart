@@ -1,3 +1,5 @@
+import 'package:akjfkgnjkawgnf/data/app_database.dart';
+import 'package:akjfkgnjkawgnf/screen/widgets/edit_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
@@ -15,22 +17,24 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _textController = TextEditingController();
 
-  Widget _getUserInput(){
+  Widget _getUserInput() {
     return Row(
       children: [
         Expanded(
           child: TextField(
             controller: _textController,
-            decoration: InputDecoration(
-              hintText: 'Enter a note',
-            ),
+            decoration: InputDecoration(hintText: 'Enter a note'),
           ),
         ),
         IconButton(
           icon: Icon(Icons.save),
           onPressed: () {
             final content = _textController.text;
-            if (content.isNotEmpty) {
+            if (content.isEmpty) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text("Enter valid data")));
+            } else {
               final note = Note(content: content);
               context.read<NotesCubit>().addNote(note);
               _textController.clear();
@@ -41,7 +45,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _getBody(){
+  void _openBottomModal(int id) async {
+    await showModalBottomSheet(
+        context: context,
+        builder: (ctx) =>
+            BlocProvider.value(
+              value: BlocProvider.of<NotesCubit>(context),
+              child: EditModal(id: id),
+            )
+    );
+  }
+
+  Widget _getBody() {
     return Expanded(
       child: BlocBuilder<NotesCubit, NotesState>(
         builder: (context, state) {
@@ -56,27 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: state.notes.length,
               itemBuilder: (context, index) {
                 final note = state.notes[index];
-                return Dismissible(
-                  key: ValueKey(note.id),
-                  onDismissed: (direction) {
-                    context.read<NotesCubit>().deleteNote(note.id!);
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20.0),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  child: ListTile(
-                    title: Text(note.content),
-                    trailing: IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        SharePlus.instance.share(ShareParams(text: note.content));
-                      },
-                    ),
-                  ),
-                );
+                return _getItem(note);
               },
             );
           }
@@ -89,25 +84,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _getItem(Note note) {
+    return Dismissible(
+      key: ValueKey(note.id),
+      onDismissed: (direction) {
+        context.read<NotesCubit>().deleteNote(note.id!);
+      },
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: 20.0),
+        child: Icon(Icons.delete, color: Colors.white),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(note.content),
+            Row(
+              children: [
+                IconButton(onPressed: () => _openBottomModal(note.id!),
+                    icon: Icon(Icons.edit)),
+                IconButton(
+                  onPressed: () {
+                    SharePlus.instance.share(ShareParams(text: note.content));
+                  },
+                  icon: Icon(Icons.share),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     context.read<NotesCubit>().loadNotes();
   }
 
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Notes'),
-      ),
+      appBar: AppBar(title: Text('Notes')),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _getUserInput(),
-          ),
+          Padding(padding: const EdgeInsets.all(8.0), child: _getUserInput()),
           _getBody(),
         ],
       ),
