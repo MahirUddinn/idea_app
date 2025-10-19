@@ -18,16 +18,16 @@ class NotesCubit extends Cubit<NotesState> {
         state.copyWith(
           status: NotesStatus.error,
           errorMessage: "Failed to load note: $e",
-        )
+        ),
       );
     }
   }
 
   void addNote(Note note) async {
     try {
-      await databaseHelper.addNote(note);
-      emit(state.copyWith(notes: [note,...state.notes]));
-
+      final id = await databaseHelper.addNote(note);
+      final newNote = note.copyWith(id: id);
+      emit(state.copyWith(notes: [newNote, ...state.notes]));
     } catch (e) {
       emit(
         state.copyWith(
@@ -54,11 +54,11 @@ class NotesCubit extends Cubit<NotesState> {
   void updateNote(Note note) async {
     try {
       await databaseHelper.updateNote(note);
-      final updatedNotes = state.notes.map((n) {
-        return n.id == note.id ? note : n;
-      }).toList();
+      final updatedNotes =
+          state.notes.map((n) {
+            return n.id == note.id ? note : n;
+          }).toList();
       emit(state.copyWith(notes: updatedNotes));
-
     } catch (e) {
       emit(
         state.copyWith(

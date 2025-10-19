@@ -17,4 +17,15 @@ class Note {
       'content': content,
     };
   }
+
+  // copyWith method
+  Note copyWith({
+    int? id,
+    String? content,
+  }) {
+    return Note(
+      id: id ?? this.id,
+      content: content ?? this.content,
+    );
+  }
 }
